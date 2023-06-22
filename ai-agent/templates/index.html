@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <style>
+        #chat-container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #chat-log {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #user-input {
+            display: flex;
+        }
+        #user-message {
+            flex: 1;
+            padding: 5px;
+        }
+        #send-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chatbot</h1>
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <div id="user-input">
+            <input type="text" id="user-message" autofocus autocomplete="off" />
+            <button id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(sender, message) {
+            var chatLog = document.getElementById("chat-log");
+            var messageDiv = document.createElement("div");
+            messageDiv.innerHTML = "<strong>" + sender + ":</strong> " + message;
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+        }
+
+        function sendMessage() {
+            var userInput = document.getElementById("user-message");
+            var userMessage = userInput.value.trim();
+            userInput.value = "";
+
+            appendMessage("You", userMessage);
+
+            // Send userMessage to the server and retrieve the bot response
+            fetch("/get_response", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "user_message=" + encodeURIComponent(userMessage)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                appendMessage("Bot", data.bot_response);
+            })
+            .catch(function(error) {
+                console.log("Error:", error);
+            });
+        }
+    </script>
+</body>
+</html>
